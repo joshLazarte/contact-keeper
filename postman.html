@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Contact Keeper Test</title>
+</head>
+
+<body>
+    <h4>Register User</h4>
+    <form id="form" action="/api/users" method="POST">
+        <input type="text" name="name" id="name" placeholder="name" />
+        <input type="text" name="email" id="email" placeholder="email" />
+        <input type="text" name="password" id="password" placeholder="password" />
+        <input type="submit" value="Submit" />
+    </form>
+    <hr>
+    <h4>Login User</h4>
+    <form id="login-form" action="/api/auth" method="POST">
+        <input type="text" name="email" id="login-email" placeholder="email" />
+        <input type="text" name="password" id="login-password" placeholder="password" />
+        <input type="submit" value="Submit" />
+    </form>
+    <hr>
+    <button id="verify">Verify User</button>
+    <hr>
+    <button id="get-contacts">Get Contacts</button>
+    <hr>
+    <h4>Add Contact</h4>
+    <form id="add-contact" action="/api/contacts" method="POST">
+        <input type="text" name="name" id="contact-name" placeholder="name" />
+        <input type="text" name="phone" id="contact-phone" placeholder="phone" />
+        <input type="text" name="email" id="contact-email" placeholder="email" />
+        <select name="type" id="contact-type">
+            <option default selected value=''>Type</option>
+            <option value="personal">personal</option>
+            <option value="proffesional">proffesional</option>
+        </select>
+
+        <input type="submit" value="Submit" />
+    </form>
+    <hr>
+    <h4>Edit Contact</h4>
+
+    <form id="edit-contact">
+        <input type="text" name="id" id="edit-contact-id" placeholder="id" />
+        <input type="text" name="name" id="edit-contact-name" placeholder="name" />
+        <input type="text" name="phone" id="edit-contact-phone" placeholder="phone" />
+        <input type="text" name="email" id="edit-contact-email" placeholder="email" />
+        <select name="type" id="edit-contact-type">
+            <option default selected value=''>Type</option>
+            <option value="personal">personal</option>
+            <option value="proffesional">proffesional</option>
+        </select>
+
+        <input type="submit" value="Submit" />
+    </form>
+    <hr>
+    <h4>Delete Contact</h4>
+    <form id="delete-contact">
+        <input type="text" name="delete-id" id="delete-contact-id" placeholder="id" />
+        <input type="submit" value="Submit" />
+    </form>
+
+    <script>
+        let token;
+
+        document.getElementById('form').addEventListener('submit', async(e) => {
+            const name = document.getElementById('name').value;
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+
+            const data = { name, email, password };
+            e.preventDefault();
+
+            const res = await fetch('/api/users', {
+                method: 'POST',
+                body: JSON.stringify(data),
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+            });
+            const jsonRes = await res.json();
+            console.log(jsonRes);
+
+        });
+
+        document.getElementById('login-form').addEventListener('submit', async(e) => {
+            const email = document.getElementById('login-email').value;
+            const password = document.getElementById('login-password').value;
+
+            const loginData = { email, password };
+            e.preventDefault();
+
+            const res = await fetch('/api/auth', {
+                method: 'POST',
+                body: JSON.stringify(loginData),
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+            });
+            const jsonRes = await res.json();
+            token = jsonRes.token;
+            console.log(jsonRes);
+        })
+
+        document.getElementById('verify').addEventListener('click', async() => {
+            const res = await fetch('/api/auth', {
+                method: 'GET',
+                headers: {
+                    'x-auth-token': token
+                }
+            });
+            const jsonRes = await res.json();
+            console.log(jsonRes);
+        })
+
+        document.getElementById('get-contacts').addEventListener('click', async() => {
+            const res = await fetch('/api/contacts', {
+                method: 'GET',
+                headers: {
+                    'x-auth-token': token
+                }
+            });
+            const jsonRes = await res.json();
+            console.log(jsonRes);
+        });
+
+        document.getElementById('add-contact').addEventListener('submit', async(e) => {
+            const name = document.getElementById('contact-name').value;
+            const email = document.getElementById('contact-email').value;
+            const phone = document.getElementById('contact-phone').value;
+            const type = document.getElementById('contact-type').value;
+
+            const data = { name, email, phone, type };
+            e.preventDefault();
+
+            const res = await fetch('/api/contacts', {
+                method: 'POST',
+                body: JSON.stringify(data),
+                headers: {
+                    'Content-Type': 'application/json',
+                    'x-auth-token': token
+                }
+            });
+            const jsonRes = await res.json();
+            console.log(jsonRes);
+        })
+
+        document.getElementById('edit-contact').addEventListener('submit', async(e) => {
+            const name = document.getElementById('edit-contact-name').value;
+            const email = document.getElementById('edit-contact-email').value;
+            const phone = document.getElementById('edit-contact-phone').value;
+            const type = document.getElementById('edit-contact-type').value;
+            const id = document.getElementById('edit-contact-id').value;
+
+            const data = { name, email, phone, type };
+            e.preventDefault();
+            const res = await fetch(`/api/contacts/${id}`, {
+                method: 'PUT',
+                body: JSON.stringify(data),
+                headers: {
+                    'Content-Type': 'application/json',
+                    'x-auth-token': token
+                }
+            });
+            const jsonRes = await res.json();
+            console.log(jsonRes);
+        });
+
+        document.getElementById('delete-contact').addEventListener('submit', async(e) => {
+            const id = document.getElementById('delete-contact-id').value;
+            e.preventDefault();
+
+            const res = await fetch(`/api/contacts/${id}`, {
+                method: 'DELETE',
+                headers: {
+                    'x-auth-token': token
+                }
+            });
+            const jsonRes = await res.json();
+            console.log(jsonRes);
+        });
+    </script>
+</body>
+
+
+
+</html>

@@ -4,7 +4,9 @@ const connectDB = require('./config/db');
 
 connectDB();
 
-app.get('/', (req, res) => res.json({ msg: 'yo what up' }));
+app.use(express.json({ extended: false }));
+
+app.get('/', (req, res) => res.sendFile(__dirname + '/postman.html'));
 
 app.use('/api/users', require('./routes/users'));
 app.use('/api/auth', require('./routes/auth'));
